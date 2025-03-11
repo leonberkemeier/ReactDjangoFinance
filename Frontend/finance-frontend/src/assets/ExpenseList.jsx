@@ -8,9 +8,12 @@ const ExpensesList = () => {
   const [newCategory, setNewCategory] = useState('');
   const [newDate, setNewDate] = useState('');
   const [categories, setCategories] = useState([]);
+
+ 
+  const [month, setMonth] = useState(''); 
   
   useEffect(() => {
-    // Fetch categories to populate the category select field
+    
     axios
       .get('http://127.0.0.1:8000/api/categories/')
       .then((response) => {
@@ -20,16 +23,20 @@ const ExpensesList = () => {
         console.error('Error fetching categories:', error);
       });
 
-    // Fetch expenses from the API
+   
     axios
-      .get('http://127.0.0.1:8000/api/expenses/')
+      .get(`http://127.0.0.1:8000/api/expenses/?month=${month}`)
       .then((response) => {
         setExpenses(response.data);
       })
       .catch((error) => {
         console.error('Error fetching expenses:', error);
       });
-  }, []);
+    if (!month) {
+      const currentMonth = new Date().getMonth() + 1; // getMonth() gibt 0 für Januar zurück
+      setMonth(currentMonth); // Setze den aktuellen Monat als Default-Wert
+    }
+  }, [month]);
 
   const handleEditExpense = (expense) => {
     // Set the expense to edit
@@ -74,8 +81,36 @@ const ExpensesList = () => {
   };
 
   return (
+
+    <>
+    
     <div>
-      <h2>Expenses</h2>
+      <h2>Expenses for {month}</h2>
+      <select value={month} onChange={(e) => setMonth(e.target.value)}>
+        <option value="01">January</option>
+        <option value="02">February</option>
+        <option value="03">March</option>
+        <option value="04">April</option>
+        <option value="05">May</option>
+        <option value="06">June</option>
+        <option value="07">July</option>
+        <option value="08">August</option>
+        <option value="09">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+      <ul>
+        {expenses.map((expense) => (
+          <li key={expense.id}>
+            {expense.amount} - {expense.category} - {expense.date}
+          </li>
+        ))}
+      </ul>
+    </div>
+    
+    <div>
+      <h2> ALL Expenses</h2>
       {editingExpense ? (
         <div>
           <h3>Edit Expense</h3>
@@ -128,6 +163,9 @@ const ExpensesList = () => {
         </ul>
       )}
     </div>
+    
+    </>
+    
   );
 };
 
